@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'date'
 require 'rdoc'
 include RDoc::Text
 
@@ -13,9 +14,9 @@ gemfile do
 end
 
 whole_team = !ARGV.delete('--whole-team').nil?
-month = ARGV.shift || Date.today.strftime('%Y-%m')
-user, token = Netrc.read['idonethis.com']
+given_date = ARGV.shift
 
+user, token = Netrc.read['idonethis.com']
 if user.nil? || token.nil?
   warn "You need to store a user and token in your ~/.netrc file. Here's an example:"
   warn <<~NETRC
@@ -26,13 +27,19 @@ if user.nil? || token.nil?
   abort
 end
 
+period_end = Date.parse("2016-01-23")
+current_period_end = given_date ? Date.parse(given_date) : Date.today
+current_period_end += 1 until (Date::DAYNAMES[current_period_end.wday] == "Saturday")
+current_period_end += 7 unless ((current_period_end - period_end) % 14).zero?
+current_period_start = current_period_end - 16
+
 client = IDoneThis::Client.new(token)
 request = {
-            done_date_after: "#{month}-01",
-            done_date_before: "#{month.succ}-01",
-            page_size: 100,
-            page: 0,
-          }
+  done_date_after: "#{current_period_start}",
+  done_date_before: "#{current_period_end}",
+  page_size: 200,
+  page: 0,
+}
 request[:owner] = user unless whole_team
 dones = []
 while
@@ -64,9 +71,9 @@ dones.each do |owner, rows|
 
   rows.each{|r| r[1] = "%0.2f" % r[1] }
   table = Terminal::Table.new headings: %w(Date Hours Description), rows: rows
-  table.title = owner
+  table.title = "#{owner} (#{current_period_start}-#{current_period_end})"
   table.add_separator
-  table.add_row [month, "%0.2f" % total_hours, "$#{"%0.2f" % (total_hours * 150)}"]
+  table.add_row ["", "%0.2f" % total_hours, "$#{"%0.2f" % (total_hours * 150)}"]
 
   puts table
   puts
