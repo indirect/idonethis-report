@@ -29,7 +29,7 @@ end
 
 period_end = Date.parse("2016-01-23")
 current_period_end = given_date ? Date.parse(given_date) : Date.today
-current_period_end += 1 until (Date::DAYNAMES[current_period_end.wday] == "Saturday")
+current_period_end -= 1 until (Date::DAYNAMES[current_period_end.wday] == "Saturday")
 current_period_end += 7 unless ((current_period_end - period_end) % 14).zero?
 current_period_start = current_period_end - 16
 
