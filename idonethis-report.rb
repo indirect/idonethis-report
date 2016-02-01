@@ -13,7 +13,6 @@ gemfile do
   gem 'terminal-table'
 end
 
-whole_team = !ARGV.delete('--whole-team').nil?
 given_date = ARGV.shift
 
 user, token = Netrc.read['idonethis.com']
@@ -40,7 +39,6 @@ request = {
   page_size: 200,
   page: 0,
 }
-request[:owner] = user unless whole_team
 dones = []
 while
   request[:page] += 1
