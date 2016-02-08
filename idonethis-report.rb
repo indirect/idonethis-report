@@ -53,7 +53,7 @@ dones.each_value do |v|
     time, desc = raw_text.split(' ', 2)
     desc.gsub!(/&amp;/, '&')
     desc.gsub!(/&(quot|rquo|lquo);/, '"')
-    minutes = if time.end_with?('h')
+    minutes = if (time =~ /hr?$/)
       time[0..-2].to_f * 60
     else
       time[0..-2].to_f
