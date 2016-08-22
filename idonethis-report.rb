@@ -66,12 +66,13 @@ end
 
 dones.each do |owner, rows|
   total_hours = rows.reduce(0) {|s, d| s + d[1] }
+  minutes = (total_hours.modulo(1.0) *  60).round
 
   rows.each{|r| r[1] = "%0.2f" % r[1] }
   table = Terminal::Table.new headings: %w(Date Hours Description), rows: rows
   table.title = "#{owner} (#{current_period_start}-#{current_period_end})"
   table.add_separator
-  table.add_row ["", "%0.2f" % total_hours, "$#{"%0.2f" % (total_hours * 150)}"]
+  table.add_row ["", "%dh %dm" % [total_hours, minutes], "$#{"%0.2f" % (total_hours * 150)}"]
 
   puts table
   puts
